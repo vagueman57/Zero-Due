@@ -4,9 +4,8 @@ const store = require('../data/store');
 
 const SplitCalculator = require('../services/splitCalculator');
 const { applyExpense } = require('../services/balanceService');
-/**
- * Create a group
- */
+
+ // Create a group
 router.post('/', (req, res) => {
   const { id, name, members } = req.body;
 
@@ -23,6 +22,11 @@ router.post('/', (req, res) => {
     if (!store.users[userId]) {
       return res.status(400).json({ error: `User ${userId} does not exist` });
     }
+  }
+
+  // Initialize group-specific ledger
+  if (!store.groupBalances[id]) {
+    store.groupBalances[id] = {};
   }
 
   store.groups[id] = {
@@ -71,8 +75,8 @@ router.post('/:groupId/expenses', (req, res) => {
         return res.status(400).json({ error: 'Invalid split type. Use EQUAL, EXACT, or PERCENTAGE' });
     }
 
-    // C. Update Ledger (Delegating to the Balance Service)
-    applyExpense(paidBy, splits);
+    // C. Update Ledger (Delegating to the Balance Service) - NOW SCOPED TO GROUP
+    applyExpense(paidBy, splits, groupId);
 
     res.status(201).json({
       message: 'Expense added',
@@ -85,17 +89,19 @@ router.post('/:groupId/expenses', (req, res) => {
   }
 });
 
-// Get Balances (Simplified View)
+// Get Balances (Per-Group View)
 router.get('/:groupId/balances', (req, res) => {
   const { groupId } = req.params;
-  if (!store.groups[groupId]) {
+  const group = store.groups[groupId];
+  
+  if (!group) {
     return res.status(404).json({ error: 'Group not found' });
   }
   
-  // Note: This returns the raw global balances. 
-  // The simplification happens in the "Simplifier" service (Step D), 
-  // but for now, returning the raw ledger confirms data is being saved.
-  res.json(store.balances);
+  // Return ledger specific to this group
+  const groupBalances = store.groupBalances[groupId] || {};
+  
+  res.json(groupBalances);
 });
 
 module.exports = router;

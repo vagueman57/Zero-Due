@@ -1,5 +1,6 @@
 module.exports = {
   users: {},     
   groups: {},    
-  balances: {}   
+  balances: {},
+  groupBalances: {}
 };
