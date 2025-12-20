@@ -1,3 +1,8 @@
+
+# Project Title
+
+A brief description of what this project does and who it's for
+
 # Expense Sharing Backend - Design Document
 
 A simplified Splitwise-like expense sharing application backend built with Node.js and Express.
@@ -242,7 +247,7 @@ Response:
 }
 
 ---
-
+```
 ## Design Decisions
 
 ### 1. In-Memory Storage
